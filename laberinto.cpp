@@ -133,3 +133,36 @@ void animarCaminoCorrecto(vector<vector<char>>& mapa, const vector<Punto>& ruta,
         Sleep(300); //Detiene el programa por 300 milisegundos
     }
 }
+
+// --- MODO MANUAL ---
+
+void modoManual(vector<vector<char>>& mapa, int filas, int cols) { //"Es la parte del código que convierte tus teclas (W, A, S, D) en movimientos del personaje dentro del laberinto, cuidando que no atravieses paredes y dibujando el camino que vas dejando atrás."
+    int jug_x = 0, jug_y = 0; 
+    while (true) { 
+        limpiarPantalla(30); 
+        cout << "--- MODO MANUAL --- (W,A,S,D | Q para Rendirse)" << endl;
+        imprimirMapa(mapa, filas, cols, jug_x, jug_y); 
+
+        if (jug_x == filas - 1 && jug_y == cols - 1) { 
+            cout << "\n¡Llegaste a la salida! Victoria." << endl;
+            break; 
+        }
+
+        char tecla = _getch();
+        if (tecla == 'q' || tecla == 'Q') { 
+            cout << "\nTe has rendido. Calculando ruta optima...\n";
+            break; 
+        }
+
+        int nx = jug_x, ny = jug_y; // Creamos coordenadas "proyectadas"
+        if (tecla == 'w' || tecla == 'W') nx--; // Arriba
+        else if (tecla == 's' || tecla == 'S') nx++; // Abajo
+        else if (tecla == 'a' || tecla == 'A') ny--; // Izquierda
+        else if (tecla == 'd' || tecla == 'D') ny++; // Derecha
+
+        if (esValido(nx, ny, filas, cols) && mapa[nx][ny] != MURO) {  
+            if (mapa[jug_x][jug_y] != ENTRADA) mapa[jug_x][jug_y] = RUTA_USUARIO; 
+            jug_x = nx; jug_y = ny; 
+        }
+    }
+}
