@@ -166,3 +166,43 @@ void modoManual(vector<vector<char>>& mapa, int filas, int cols) { //"Es la part
         }
     }
 }
+
+// --- MAIN ---
+
+int main() { // Esta es la función principal del programa, se encarga de pedirte el tamaño del laberinto, generarlo automáticamente, dejarte jugar y finalmente mostrarte cómo la computadora lo resuelve en tiempo récord.
+    int fila, columna; 
+    cout << "========================================" << endl;
+    cout << "    GENERADOR DE LABERINTOS MAESTRO      " << endl;
+    cout << "========================================" << endl;
+    cout << "Ingrese el num. de filas: "; cin >> fila;
+    cout << "Ingrese el num. de columnas: "; cin >> columna; // Detiene el programa para que escribas un número. Es la contraparte de cout.
+
+    int filasT = (fila < 5) ? 5 : (fila % 2 == 0 ? fila + 1 : fila); 
+    int colsT = (columna < 5) ? 5 : (columna % 2 == 0 ? columna + 1 : columna); //Si el tablero tuviera dimensiones pares, el explorador se "estrellaría" contra el borde exterior al intentar hacer su último salto de 2 casillas, dejando el laberinto sin una pared de cierre en uno de los lados.
+
+    vector<vector<char>> mapa(filasT, vector<char>(colsT, MURO));
+    
+    generar(0, 0, mapa, filasT, colsT); 
+    mapa[0][0] = ENTRADA;
+    mapa[filasT-1][colsT-1] = SALIDA; 
+
+    cout << "\nPresiona una tecla para jugar..."; _getch();
+    modoManual(mapa, filasT, colsT); 
+    
+    cout << "\nPresiona una tecla para ver la solucion directa..."; _getch(); 
+
+    for(int i=0; i<filasT; i++) 
+        for(int j=0; j<colsT; j++)
+            if(mapa[i][j] == RUTA_USUARIO) mapa[i][j] = CAMINO;
+
+    clock_t inicio = clock(); 
+    vector<Punto> ruta = encontrarRutaBFS(filasT, colsT, mapa); 
+    animarCaminoCorrecto(mapa, ruta, filasT, colsT); 
+    clock_t fin = clock(); 
+
+    cout << "\n--- PROCESO TERMINADO ---" << endl;
+    cout << "Tiempo de calculo: " << (double)(fin - inicio) / CLOCKS_PER_SEC << " segundos." << endl; 
+    cout << "\nPresiona cualquier tecla para cerrar el juego..." << endl; 
+    _getch();
+
+    return 0;} 
