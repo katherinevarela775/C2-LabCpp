@@ -46,3 +46,25 @@ void imprimirMapa(const vector<vector<char>>& mapa, int filas, int cols, int jug
         cout << "\n"; 
     }
 }
+
+// --- LÓGICA DE GENERACIÓN ---
+
+void generar(int x, int y, vector<vector<char>>& mapa, int filas, int cols) { // Esta funcion es la que utiliza el DFS
+// Crea el laberinto mediante un algoritmo de excavación aleatoria. 
+// Utiliza recursividad para avanzar por el mapa saltando de dos en dos casillas, rompiendo los muros intermedios para garantizar que siempre exista un camino conectado y sin ciclos entre cualquier punto del tablero.
+    mapa[x][y] = CAMINO; 
+    int dx[] = {0, 0, 2, -2}; 
+    int dy[] = {2, -2, 0, 0};
+    vector<int> dir = {0, 1, 2, 3}; 
+    static mt19937 rng(time(NULL)); 
+    shuffle(dir.begin(), dir.end(), rng);
+
+    for (int i = 0; i < 4; i++) { // Este for intenta ir en las 4 direcciones que mezclamos antes.
+        int nx = x + dx[dir[i]];  
+        int ny = y + dy[dir[i]];
+        if (esValido(nx, ny, filas, cols) && mapa[nx][ny] == MURO) { 
+            mapa[x + dx[dir[i]] / 2][y + dy[dir[i]] / 2] = CAMINO; 
+            generar(nx, ny, mapa, filas, cols); // Aquí ocurre la recursividad. La función se detiene y abre una "sub-función" para seguir excavando desde la nueva casilla. Cuando ese camino se bloquea, la función original retoma donde se quedó y prueba la siguiente dirección del for.
+        }
+    } 
+}
