@@ -68,3 +68,68 @@ void generar(int x, int y, vector<vector<char>>& mapa, int filas, int cols) { //
         }
     } 
 }
+
+// --- NUEVA BÚSQUEDA BFS ---
+
+
+vector<Punto> encontrarRutaBFS(int filas, int cols, const vector<vector<char>>& mapa) { 
+// Utiliza el algoritmo BFS para explorar el mapa de forma radial, garantizando el hallazgo del camino más corto desde el inicio hasta la salida mediante una cola de exploración y un registro de movimientos previos.
+    queue<Punto> queue; 
+    queue.push({0, 0}); 
+    
+    map<Punto, Punto> padres; // Este diccionario guarda pares de coord. {Hijo, Padre}
+    vector<vector<bool>> visitado(filas, vector<bool>(cols, false)); // Una matriz llena de interrup. para evitar bucles
+    visitado[0][0] = true; 
+
+    int dx[] = {1, -1, 0, 0}; 
+    int dy[] = {0, 0, 1, -1}; 
+    bool encontrado = false; 
+    while (!queue.empty()) { 
+        Punto punt_actual = queue.front();
+        queue.pop(); 
+
+        if (punt_actual.x == filas - 1 && punt_actual.y == cols - 1) { 
+            encontrado = true; 
+            break; 
+        }
+
+        for (int i = 0; i < 4; i++) { 
+            int nx = punt_actual.x + dx[i]; 
+            int ny = punt_actual.y + dy[i]; 
+
+            if (esValido(nx, ny, filas, cols) && mapa[nx][ny] != MURO && !visitado[nx][ny]) {
+                visitado[nx][ny] = true;  
+                padres[{nx, ny}] = punt_actual; 
+                queue.push({nx, ny}); 
+            }
+        }
+    }
+
+    vector<Punto> ruta; // Esta sección reconstruye el camino óptimo rastreando hacia atrás las coordenadas desde la salida hasta el inicio mediante el diccionario de "padres", invirtiendo finalmente la lista para entregar la ruta en el orden correcto de avance.
+    if (encontrado) { 
+        Punto coord_expl = {filas - 1, cols - 1}; 
+        while (!(coord_expl.x == 0 && coord_expl.y == 0)) { 
+            ruta.push_back(coord_expl); 
+            coord_expl = padres[coord_expl]; 
+        }
+        ruta.push_back({0, 0}); 
+        reverse(ruta.begin(), ruta.end()); 
+    }
+    return ruta; 
+}
+
+void animarCaminoCorrecto(vector<vector<char>>& mapa, const vector<Punto>& ruta, int filas, int cols) { //se encarga de la salida visual de la solución.
+    for (int i = 0; i < ruta.size(); i++) { 
+        int rx = ruta[i].x; //Extrae la fila y columna del punto actual en la ruta.
+        int ry = ruta[i].y;
+
+        if (mapa[rx][ry] != ENTRADA && mapa[rx][ry] != SALIDA) { 
+            mapa[rx][ry] = RUTA_COMPU;
+        }
+
+        limpiarPantalla(25); //Empuja el laberinto anterior hacia arriba para que el nuevo aparezca en el mismo lugar.
+        cout << "--- MOSTRANDO CAMINO CORRECTO ---" << endl;
+        imprimirMapa(mapa, filas, cols); //Dibuja el laberinto actualizado (ahora con un nuevo asterisco pintado).
+        Sleep(300); //Detiene el programa por 300 milisegundos
+    }
+}
